@@ -69,8 +69,18 @@ class splunk::forwarder::install {
     })
   }
 
-  package { $splunk::forwarder::package_name:
+  if $splunk::forwarder::package_provider == 'rpm' {
+    yum::gpgkey { 'splunk':
+      ensure => 'present',
+      path   => '/etc/pki/rpm-gpg/RPM-GPG-KEY-splunk',
+      source => 'puppet:///modules/splunk/RPM-GPG-KEY-splunk',
+      before => Package['splunkforwarder']
+    }
+  }
+
+  package { 'splunkforwarder':
     ensure          => $splunk::forwarder::package_ensure,
+    name            => $splunk::forwarder::package_name,
     provider        => $splunk::forwarder::package_provider,
     install_options => $splunk::forwarder::install_options,
   }
